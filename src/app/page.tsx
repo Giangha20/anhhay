@@ -119,7 +119,11 @@ export default function HomePage() {
           params.set('search', searchQuery.trim());
         }
 
-        const res = await fetch(`/api/public/gallery?${params.toString()}`);
+        // Try shared endpoint with public=1 to guarantee sharing same serverless container, fallback to public gallery
+        let res = await fetch(`/api/admin/images?public=1&${params.toString()}`, { cache: 'no-store' });
+        if (!res.ok) {
+          res = await fetch(`/api/public/gallery?${params.toString()}`, { cache: 'no-store' });
+        }
         if (res.ok) {
           const data = await res.json();
           if (append) {

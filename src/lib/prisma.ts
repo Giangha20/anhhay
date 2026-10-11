@@ -7,7 +7,7 @@ if (process.env.VERCEL || process.platform !== 'win32') {
   try {
     const targetDbPath = '/tmp/photoweb.db';
     const sourceDb = path.join(process.cwd(), 'prisma', 'photoweb.db');
-    if (fs.existsSync(sourceDb)) {
+    if (!fs.existsSync(targetDbPath) && fs.existsSync(sourceDb)) {
       fs.copyFileSync(sourceDb, targetDbPath);
     }
     process.env.DATABASE_URL = `file:${targetDbPath}`;

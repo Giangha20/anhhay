@@ -9,12 +9,16 @@ export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
   try {
-    const auth = await getAuthenticatedAdmin();
-    if (!auth) {
-      return NextResponse.json({ error: 'Yêu cầu đăng nhập quản trị viên' }, { status: 401 });
+    const { searchParams } = req.nextUrl;
+    const isPublic = searchParams.get('public') === '1';
+
+    if (!isPublic) {
+      const auth = await getAuthenticatedAdmin();
+      if (!auth) {
+        return NextResponse.json({ error: 'Yêu cầu đăng nhập quản trị viên' }, { status: 401 });
+      }
     }
 
-    const { searchParams } = req.nextUrl;
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
     const search = searchParams.get('search')?.trim() || '';
@@ -46,15 +50,24 @@ export async function GET(req: NextRequest) {
       }),
     ]);
 
-    return NextResponse.json({
-      images,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+    return NextResponse.json(
+      {
+        images,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
       },
-    });
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      }
+    );
   } catch (error) {
     console.error('Lỗi lấy danh sách ảnh admin:', error);
     return NextResponse.json({ error: 'Lỗi máy chủ khi lấy danh sách ảnh' }, { status: 500 });
