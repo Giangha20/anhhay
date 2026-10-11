@@ -12,7 +12,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
-    "test:api": "node scripts/test-api.js"
+    "test:api": "node scripts/test-api.js",
+    "verify:e2e": "node scripts/verify-e2e.js"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

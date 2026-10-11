@@ -200,6 +200,14 @@ export async function saveImageToDisk(
   // Write original file
   await fs.promises.writeFile(targetOriginalPath, buffer);
 
+  // Sync copy to public/images if directory exists
+  try {
+    const publicImagesDir = path.join(process.cwd(), 'public', 'images');
+    if (fs.existsSync(publicImagesDir)) {
+      await fs.promises.writeFile(path.join(publicImagesDir, filename), buffer);
+    }
+  } catch {}
+
   // Generate thumbnail: max 600px width/height, webp quality 80
   const thumbFilename = `thumb_${filename.replace(/\.[^/.]+$/, '')}.webp`;
   const targetThumbPath = assertSafePath(THUMBNAILS_DIR, thumbFilename);
@@ -236,6 +244,13 @@ export async function deleteImageFromDisk(filename: string): Promise<void> {
   } catch (err) {
     console.error(`Lỗi khi xóa ảnh gốc ${filename}:`, err);
   }
+
+  try {
+    const publicImgPath = path.join(process.cwd(), 'public', 'images', filename);
+    if (fs.existsSync(publicImgPath)) {
+      await fs.promises.unlink(publicImgPath);
+    }
+  } catch {}
 
   try {
     const thumbFilename = `thumb_${filename.replace(/\.[^/.]+$/, '')}.webp`;
