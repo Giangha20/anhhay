@@ -57,6 +57,12 @@ export default function AdminPhotosPage() {
   const [uploadDesc, setUploadDesc] = useState('');
   const [uploadCatId, setUploadCatId] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{
+    current: number;
+    total: number;
+    percent: number;
+    currentFileName: string;
+  } | null>(null);
   const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -133,7 +139,7 @@ export default function AdminPhotosPage() {
     }
   };
 
-  // Submit Upload
+  // Submit Upload - Hỗ trợ không giới hạn số lượng ảnh
   const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedFiles.length === 0) return;
@@ -141,46 +147,72 @@ export default function AdminPhotosPage() {
     setIsUploading(true);
     setUploadMessage(null);
 
-    const formData = new FormData();
-    selectedFiles.forEach((file) => formData.append('files', file));
-    if (uploadTitle) formData.append('title', uploadTitle);
-    if (uploadDesc) formData.append('description', uploadDesc);
-    if (uploadCatId) formData.append('categoryId', uploadCatId);
+    let successCount = 0;
+    const errors: string[] = [];
 
-    try {
-      const res = await fetch('/api/admin/images', {
-        method: 'POST',
-        body: formData,
+    // Tải tuần tự từng tệp - giải quyết triệt để lỗi Payload Too Large, hỗ trợ chọn hàng trăm ảnh cùng lúc
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const file = selectedFiles[i];
+      const progressPercent = Math.round(((i + 1) / selectedFiles.length) * 100);
+
+      setUploadProgress({
+        current: i + 1,
+        total: selectedFiles.length,
+        percent: progressPercent,
+        currentFileName: file.name,
       });
 
-      const data = await res.json();
+      const formData = new FormData();
+      formData.append('files', file);
 
-      if (res.ok && data.success) {
-        setUploadMessage({
-          type: 'success',
-          text: `Đã tải lên thành công ${data.uploadedCount} ảnh vào ổ D!`,
-        });
-        setSelectedFiles([]);
-        setUploadTitle('');
-        setUploadDesc('');
-        loadImages();
-        setTimeout(() => {
-          setUploadModalOpen(false);
-          setUploadMessage(null);
-        }, 1500);
-      } else {
-        setUploadMessage({
-          type: 'error',
-          text: data.error || (data.errors && data.errors.join(', ')) || 'Tải ảnh thất bại',
-        });
+      // Gán tiêu đề phù hợp
+      if (selectedFiles.length === 1 && uploadTitle.trim()) {
+        formData.append('title', uploadTitle.trim());
+      } else if (selectedFiles.length > 1 && uploadTitle.trim()) {
+        formData.append('title', `${uploadTitle.trim()} (${i + 1})`);
       }
-    } catch (err: any) {
+
+      if (uploadDesc.trim()) formData.append('description', uploadDesc.trim());
+      if (uploadCatId) formData.append('categoryId', uploadCatId);
+
+      try {
+        const res = await fetch('/api/admin/images', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          successCount++;
+        } else {
+          errors.push(`${file.name}: ${data.error || 'Lỗi tải ảnh'}`);
+        }
+      } catch (err: any) {
+        errors.push(`${file.name}: Lỗi kết nối`);
+      }
+    }
+
+    setIsUploading(false);
+    setUploadProgress(null);
+
+    if (successCount > 0) {
+      setUploadMessage({
+        type: 'success',
+        text: `Đã tải lên thành công ${successCount}/${selectedFiles.length} bức ảnh vào thư viện!`,
+      });
+      setSelectedFiles([]);
+      setUploadTitle('');
+      setUploadDesc('');
+      loadImages();
+      setTimeout(() => {
+        setUploadModalOpen(false);
+        setUploadMessage(null);
+      }, 2500);
+    } else {
       setUploadMessage({
         type: 'error',
-        text: 'Lỗi kết nối máy chủ khi tải ảnh',
+        text: errors.length > 0 ? errors.slice(0, 3).join(', ') : 'Tất cả các ảnh tải lên đều thất bại',
       });
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -468,40 +500,81 @@ export default function AdminPhotosPage() {
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
                   Kéo thả ảnh vào đây hoặc nhấp để chọn tệp
                 </p>
-                <p className="text-xs text-slate-400 mt-1">
-                  Hỗ trợ JPEG, PNG, WebP, GIF (tối đa 50MB/ảnh)
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
+                  ✨ Hỗ trợ tải lên KHÔNG GIỚI HẠN số lượng ảnh (chọn hàng trăm ảnh cùng lúc)
+                </p>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Hỗ trợ JPEG, PNG, WebP, GIF (tối đa 100MB/ảnh)
                 </p>
 
                 {selectedFiles.length > 0 && (
-                  <div className="mt-3 p-2 bg-emerald-50 dark:bg-emerald-950/50 rounded-xl text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                    Đã chọn {selectedFiles.length} tệp ({selectedFiles.map((f) => f.name).join(', ')})
+                  <div className="mt-3 p-3 bg-emerald-50 dark:bg-emerald-950/50 rounded-xl text-xs font-semibold text-emerald-700 dark:text-emerald-300 flex items-center justify-between">
+                    <span>Đã chọn {selectedFiles.length} bức ảnh</span>
+                    {!isUploading && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedFiles([]);
+                        }}
+                        className="text-rose-500 hover:text-rose-700 font-bold text-xs underline"
+                      >
+                        Bỏ chọn
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
 
+              {/* Real-time upload progress bar */}
+              {uploadProgress && (
+                <div className="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 space-y-2 animate-fade-in shadow-inner">
+                  <div className="flex items-center justify-between text-xs font-bold text-emerald-800 dark:text-emerald-200">
+                    <span className="flex items-center gap-1.5">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                      <span>Đang tải lên: {uploadProgress.current} / {uploadProgress.total} ảnh</span>
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100 text-[11px]">
+                      {uploadProgress.percent}%
+                    </span>
+                  </div>
+                  <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-300 shadow-sm"
+                      style={{ width: `${uploadProgress.percent}%` }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 truncate">
+                    Đang xử lý: {uploadProgress.currentFileName}
+                  </p>
+                </div>
+              )}
+
               {/* Title */}
               <div>
                 <label className="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1.5">
-                  Tên / Tiêu đề ảnh
+                  Tên / Tiêu đề ảnh (Áp dụng khi tải 1 ảnh hoặc làm tiền tố)
                 </label>
                 <input
                   type="text"
-                  placeholder="Để trống sẽ tự động lấy theo tên tệp"
+                  placeholder="Để trống sẽ tự động lấy theo tên tệp gốc"
                   value={uploadTitle}
+                  disabled={isUploading}
                   onChange={(e) => setUploadTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-emerald-500 disabled:opacity-50"
                 />
               </div>
 
               {/* Category */}
               <div>
                 <label className="block text-xs font-bold uppercase text-slate-700 dark:text-slate-300 mb-1.5">
-                  Danh mục
+                  Danh mục phân loại
                 </label>
                 <select
                   value={uploadCatId}
+                  disabled={isUploading}
                   onChange={(e) => setUploadCatId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-emerald-500 disabled:opacity-50"
                 >
                   <option value="">Chưa phân loại</option>
                   {categories.map((cat) => (
@@ -519,10 +592,11 @@ export default function AdminPhotosPage() {
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Nhập mô tả cho bức ảnh..."
+                  placeholder="Nhập mô tả chung cho các bức ảnh..."
                   value={uploadDesc}
+                  disabled={isUploading}
                   onChange={(e) => setUploadDesc(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-emerald-500 disabled:opacity-50"
                 />
               </div>
 
@@ -530,8 +604,9 @@ export default function AdminPhotosPage() {
               <div className="pt-2 flex items-center justify-end gap-3">
                 <button
                   type="button"
+                  disabled={isUploading}
                   onClick={() => setUploadModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40"
                 >
                   Hủy
                 </button>
@@ -543,10 +618,18 @@ export default function AdminPhotosPage() {
                   {isUploading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Đang lưu vào ổ D...</span>
+                      <span>
+                        {uploadProgress
+                          ? `Đang tải ${uploadProgress.current}/${uploadProgress.total} (${uploadProgress.percent}%)`
+                          : 'Đang lưu ảnh...'}
+                      </span>
                     </>
                   ) : (
-                    <span>Bắt đầu tải lên</span>
+                    <span>
+                      {selectedFiles.length > 0
+                        ? `Tải lên ${selectedFiles.length} ảnh`
+                        : 'Bắt đầu tải lên'}
+                    </span>
                   )}
                 </button>
               </div>

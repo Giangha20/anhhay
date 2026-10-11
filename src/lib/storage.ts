@@ -30,7 +30,7 @@ export const ALLOWED_MIME_TYPES = [
   'image/gif',
 ];
 
-export const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024; // 50MB per file
+export const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024; // 100MB per file (Không giới hạn ảnh lớn)
 
 /**
  * Ensures all required storage directories exist and are writable

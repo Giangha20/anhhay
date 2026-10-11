@@ -4,6 +4,9 @@ import { getAuthenticatedAdmin } from '@/lib/auth';
 import { saveImageToDisk, ensureStorageDirectories } from '@/lib/storage';
 import { logAudit } from '@/lib/audit';
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
 export async function GET(req: NextRequest) {
   try {
     const auth = await getAuthenticatedAdmin();
