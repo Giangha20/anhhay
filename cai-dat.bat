@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 echo ========================================================
-echo     PHOTOWEB - CÀI ĐẶT HỆ THỐNG MÁY CHỦ TRÊN Ổ D
+echo     PHOTOWEB - CÀI ĐẶT HỆ THỐNG THƯ VIỆN ẢNH
 echo ========================================================
 echo.
 
@@ -26,7 +26,7 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo.
 echo [3/4] Đang đồng bộ cơ sở dữ liệu SQLite vào D:\PhotoWeb\storage\photoweb.db...
-call npx prisma db push
+call npx prisma db push --accept-data-loss
 if %ERRORLEVEL% NEQ 0 (
     echo [LỖI] Không thể tạo cơ sở dữ liệu SQLite.
     pause
@@ -34,7 +34,7 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo.
-echo [4/4] Đang khởi tạo tài khoản quản trị và dữ liệu mẫu ban đầu...
+echo [4/4] Đang khởi tạo dữ liệu mẫu ban đầu...
 call node prisma/seed.js
 if %ERRORLEVEL% NEQ 0 (
     echo [LỖI] Không thể chạy seed script.
@@ -45,8 +45,6 @@ if %ERRORLEVEL% NEQ 0 (
 echo.
 echo ========================================================
 echo     CÀI ĐẶT HOÀN TẤT THÀNH CÔNG!
-echo     Tài khoản admin ban đầu: giangtptq
-echo     Mật khẩu ban đầu: Giangha@2k5
-echo     Bạn có thể chạy 'chay-server.bat' để khởi động máy chủ.
+echo     Bạn có thể chạy 'chay-server.bat' để khởi động website.
 echo ========================================================
 pause

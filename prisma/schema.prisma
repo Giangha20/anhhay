@@ -7,18 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Admin {
-  id                 String         @id @default(cuid())
-  username           String         @unique
-  passwordHash       String
-  mustChangePassword Boolean        @default(true)
-  isActive           Boolean        @default(true)
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
-  sessions           AdminSession[]
-  auditLogs          AuditLog[]
-}
-
 model Image {
   id            String    @id @default(cuid())
   title         String
@@ -60,12 +48,12 @@ model Category {
 
 model SiteSettings {
   id                    String   @id @default("default")
-  siteName              String   @default("PhotoWeb Gallery")
+  siteName              String   @default("Ảnh Hay")
   logoUrl               String?
-  seoTitle              String   @default("PhotoWeb - Thư viện ảnh chuyên nghiệp")
-  seoDescription        String   @default("Bộ sưu tập ảnh chất lượng cao")
-  introText             String   @default("Chào mừng đến với thư viện ảnh PhotoWeb.")
-  footerText            String   @default("© 2026 PhotoWeb. Bảo lưu mọi quyền.")
+  seoTitle              String   @default("Ảnh Hay - Thư viện ảnh nghệ thuật trực tuyến")
+  seoDescription        String   @default("Bộ sưu tập ảnh chất lượng cao và khoảnh khắc nghệ thuật đặc sắc")
+  introText             String   @default("Khám phá những khoảnh khắc tuyệt đẹp qua lăng kính nghệ thuật. Thư viện hình ảnh chất lượng cao mở cho tất cả mọi người.")
+  footerText            String   @default("© 2026 Ảnh Hay (anhhay). Thư viện ảnh nghệ thuật trực tuyến.")
   contactInfo           String?
   primaryColor          String   @default("#10b981")
   bgColor               String   @default("#0f172a")
@@ -94,38 +82,4 @@ model ContentBlock {
   updatedAt  DateTime @updatedAt
 
   @@index([order])
-}
-
-model AdminSession {
-  id        String   @id @default(cuid())
-  adminId   String
-  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  token     String   @unique
-  ipAddress String?
-  userAgent String?
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@index([adminId])
-  @@index([token])
-}
-
-model AuditLog {
-  id        String   @id @default(cuid())
-  adminId   String?
-  admin     Admin?   @relation(fields: [adminId], references: [id], onDelete: SetNull)
-  action    String
-  details   String?
-  ipAddress String?
-  createdAt DateTime @default(now())
-
-  @@index([createdAt])
-}
-
-model LoginAttempt {
-  id          String    @id @default(cuid())
-  ipAddress   String    @unique
-  attempts    Int       @default(1)
-  lockedUntil DateTime?
-  lastAttempt DateTime  @default(now())
 }

@@ -46,11 +46,22 @@ export async function GET(
         if (fs.existsSync(potentialOriginalPath)) {
           targetPath = potentialOriginalPath;
         }
-      } catch (err: any) {
-        return NextResponse.json(
-          { error: 'Yêu cầu tệp không hợp lệ' },
-          { status: 400 }
-        );
+      } catch {
+        // Check fallback below
+      }
+    }
+
+    // Fallback to bundled public/images directory if available
+    if (!targetPath) {
+      try {
+        if (!filename.includes('..') && !filename.includes('/') && !filename.includes('\\')) {
+          const publicFallback = path.join(process.cwd(), 'public', 'images', filename);
+          if (fs.existsSync(publicFallback)) {
+            targetPath = publicFallback;
+          }
+        }
+      } catch {
+        // Ignore
       }
     }
 
