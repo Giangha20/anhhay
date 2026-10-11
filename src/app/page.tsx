@@ -84,6 +84,14 @@ export default function HomePage() {
           const catData = await catRes.json();
           if (catData.categories) setCategories(catData.categories);
         }
+
+        if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          const catParam = params.get('categoryId');
+          if (catParam) setSelectedCategory(catParam);
+          const searchParam = params.get('search');
+          if (searchParam) setSearchQuery(searchParam);
+        }
       } catch (err) {
         console.error('Lỗi tải thông tin ban đầu:', err);
       }
@@ -192,44 +200,39 @@ export default function HomePage() {
 
         {/* Gallery Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          {/* Controls Bar: Category Filters & Search */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
-            {/* Category Pills */}
-            <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-none">
-              <button
-                onClick={() => setSelectedCategory('all')}
-                className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold shrink-0 transition-all ${
-                  selectedCategory === 'all'
-                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20'
-                    : 'bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800'
-                }`}
-              >
-                Tất cả ảnh
-              </button>
-
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold shrink-0 transition-all ${
-                    selectedCategory === cat.id
-                      ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20'
-                      : 'bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  {cat.name}
-                  {cat._count && cat._count.images > 0 && (
-                    <span className="ml-1.5 opacity-70 text-xs">({cat._count.images})</span>
-                  )}
-                </button>
-              ))}
+          {/* Gallery Header */}
+          <div className="flex items-center justify-between gap-4 mb-8">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                {selectedCategory !== 'all'
+                  ? categories.find((c) => c.id === selectedCategory)?.name || 'Bộ sưu tập theo danh mục'
+                  : 'Thư viện ảnh'}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Tất cả tác phẩm được lưu trữ và hiển thị trực tiếp
+              </p>
             </div>
-
-            {/* Total items badge */}
-            <div className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 shrink-0 self-end sm:self-center">
-              Hiển thị <span className="font-bold text-slate-900 dark:text-white">{images.length}</span> / {totalCount} ảnh
+            <div className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 shrink-0">
+              Tổng số <span className="font-bold text-slate-900 dark:text-white">{totalCount}</span> ảnh
             </div>
           </div>
+
+          {/* Active Category Filter Notification */}
+          {selectedCategory !== 'all' && (
+            <div className="mb-6 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 flex items-center justify-between text-xs sm:text-sm text-emerald-800 dark:text-emerald-300">
+              <div className="flex items-center gap-2">
+                <span>
+                  Đang lọc theo danh mục: <strong>"{categories.find((c) => c.id === selectedCategory)?.name || 'Danh mục'}"</strong>
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedCategory('all')}
+                className="underline hover:text-emerald-900 font-semibold"
+              >
+                Xem tất cả ảnh
+              </button>
+            </div>
+          )}
 
           {/* Active Search Filter Notification */}
           {searchQuery && (
@@ -277,20 +280,28 @@ export default function HomePage() {
                 <ImageIcon className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                {searchQuery ? 'Không tìm thấy hình ảnh phù hợp' : 'Bộ sưu tập đang được cập nhật'}
+                {searchQuery ? 'Không tìm thấy hình ảnh phù hợp' : 'Thư viện ảnh đang trống'}
               </h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
                 {searchQuery
                   ? 'Vui lòng thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc danh mục.'
-                  : 'Các tác phẩm mới đang được tuyển chọn và sẽ xuất hiện sớm nhất.'}
+                  : 'Chưa có bức ảnh nào trong bộ sưu tập. Hãy bắt đầu tải lên những bức ảnh đầu tiên!'}
               </p>
-              {searchQuery && (
+              {searchQuery ? (
                 <button
                   onClick={() => setSearchQuery('')}
                   className="px-5 py-2.5 rounded-xl bg-emerald-500 text-white font-semibold text-sm hover:bg-emerald-600 transition-colors shadow-md shadow-emerald-500/20"
                 >
                   Xem toàn bộ ảnh
                 </button>
+              ) : (
+                <Link
+                  href="/admin/photos"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 transition-all hover:scale-105"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>Tải ảnh lên ngay</span>
+                </Link>
               )}
             </div>
           )}
