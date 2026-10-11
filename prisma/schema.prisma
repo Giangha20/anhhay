@@ -30,6 +30,8 @@ model Image {
   size          Int
   width         Int?
   height        Int?
+  thumbDataUrl  String?
+  dataUrl       String?
   categoryId    String?
   category      Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   createdAt     DateTime  @default(now())

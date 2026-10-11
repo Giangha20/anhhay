@@ -196,6 +196,8 @@ export async function saveImageToDisk(
   size: number;
   width: number;
   height: number;
+  thumbDataUrl?: string | null;
+  dataUrl?: string | null;
 }> {
   ensureStorageDirectories();
 
@@ -222,13 +224,30 @@ export async function saveImageToDisk(
   const thumbFilename = `thumb_${filename.replace(/\.[^/.]+$/, '')}.webp`;
   const targetThumbPath = assertSafePath(THUMBNAILS_DIR, thumbFilename);
 
+  let thumbDataUrl: string | null = null;
   try {
-    await sharp(buffer)
+    const thumbBuffer = await sharp(buffer)
       .resize({ width: 600, height: 600, fit: 'inside', withoutEnlargement: true })
       .webp({ quality: 80 })
-      .toFile(targetThumbPath);
+      .toBuffer();
+    await fs.promises.writeFile(targetThumbPath, thumbBuffer);
+    thumbDataUrl = `data:image/webp;base64,${thumbBuffer.toString('base64')}`;
   } catch (thumbErr) {
     console.warn('Lỗi tạo ảnh thumbnail, bỏ qua tạo thumb riêng:', thumbErr);
+  }
+
+  // Generate web-friendly base64 dataUrl (max 1600px, webp 82) for fail-safe serverless display
+  let dataUrl: string | null = null;
+  try {
+    const optimizedBuffer = await sharp(buffer)
+      .resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+    dataUrl = `data:image/webp;base64,${optimizedBuffer.toString('base64')}`;
+  } catch {
+    if (buffer.length < 5 * 1024 * 1024) {
+      dataUrl = `data:${validation.format};base64,${buffer.toString('base64')}`;
+    }
   }
 
   return {
@@ -239,6 +258,8 @@ export async function saveImageToDisk(
     size: validation.size,
     width: validation.width,
     height: validation.height,
+    thumbDataUrl,
+    dataUrl,
   };
 }
 

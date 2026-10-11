@@ -65,6 +65,7 @@ export async function GET(req: NextRequest) {
           width: true,
           height: true,
           size: true,
+          thumbDataUrl: true,
           createdAt: true,
           category: {
             select: {

@@ -128,6 +128,8 @@ export async function POST(req: NextRequest) {
             size: saved.size,
             width: saved.width,
             height: saved.height,
+            thumbDataUrl: saved.thumbDataUrl || null,
+            dataUrl: saved.dataUrl || null,
             categoryId: targetCategoryId,
           },
         });

@@ -14,7 +14,6 @@ import {
   ChevronDown,
   RefreshCw,
   Search,
-  Upload,
 } from 'lucide-react';
 
 interface CategoryItem {
@@ -185,15 +184,7 @@ export default function HomePage() {
               <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-600 dark:text-slate-400 font-normal leading-relaxed">
                 {settings.introText}
               </p>
-              <div className="pt-2 flex items-center justify-center gap-3">
-                <Link
-                  href="/admin/photos"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 transition-all hover:scale-105"
-                >
-                  <Upload className="w-4 h-4" />
-                  <span>Tải ảnh lên ngay</span>
-                </Link>
-              </div>
+
             </div>
           </section>
         )}
@@ -280,28 +271,20 @@ export default function HomePage() {
                 <ImageIcon className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                {searchQuery ? 'Không tìm thấy hình ảnh phù hợp' : 'Thư viện ảnh đang trống'}
+                {searchQuery ? 'Không tìm thấy hình ảnh phù hợp' : 'Bộ sưu tập đang được cập nhật'}
               </h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
                 {searchQuery
                   ? 'Vui lòng thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc danh mục.'
-                  : 'Chưa có bức ảnh nào trong bộ sưu tập. Hãy bắt đầu tải lên những bức ảnh đầu tiên!'}
+                  : 'Các tác phẩm mới đang được tuyển chọn và sẽ xuất hiện sớm nhất.'}
               </p>
-              {searchQuery ? (
+              {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
                   className="px-5 py-2.5 rounded-xl bg-emerald-500 text-white font-semibold text-sm hover:bg-emerald-600 transition-colors shadow-md shadow-emerald-500/20"
                 >
                   Xem toàn bộ ảnh
                 </button>
-              ) : (
-                <Link
-                  href="/admin/photos"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 transition-all hover:scale-105"
-                >
-                  <Upload className="w-4 h-4" />
-                  <span>Tải ảnh lên ngay</span>
-                </Link>
               )}
             </div>
           )}

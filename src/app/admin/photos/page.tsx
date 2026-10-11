@@ -33,6 +33,8 @@ interface ImageItem {
   size: number;
   width?: number | null;
   height?: number | null;
+  thumbDataUrl?: string | null;
+  dataUrl?: string | null;
   createdAt: string;
   categoryId?: string | null;
   category?: { id: string; name: string } | null;
@@ -363,7 +365,7 @@ export default function AdminPhotosPage() {
               {/* Image Thumbnail */}
               <div className="relative aspect-video bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <img
-                  src={`/api/images/${image.filename}?thumb=1`}
+                  src={image.thumbDataUrl || `/api/images/${image.filename}?thumb=1`}
                   alt={image.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Sun, Moon, Menu, X, Image as ImageIcon, Upload } from 'lucide-react';
+import { Search, Sun, Moon, Menu, X, Image as ImageIcon } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 
 interface NavbarProps {
@@ -84,13 +84,7 @@ export function Navbar({ siteName, logoUrl, onSearch, initialSearch = '' }: Navb
             >
               Danh mục
             </Link>
-            <Link
-              href="/admin/photos"
-              className="px-3.5 py-2 text-sm font-bold rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition-all hover:scale-105"
-            >
-              <Upload className="w-4 h-4" />
-              <span>Tải ảnh lên</span>
-            </Link>
+
 
 
             {/* Dark / Light Toggle */}
@@ -144,14 +138,7 @@ export function Navbar({ siteName, logoUrl, onSearch, initialSearch = '' }: Navb
               />
             </form>
             <div className="flex flex-col space-y-2 pt-1">
-              <Link
-                href="/admin/photos"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-2.5 px-4 rounded-xl bg-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20"
-              >
-                <Upload className="w-4 h-4" />
-                <span>Tải ảnh lên ngay</span>
-              </Link>
+
               <Link
                 href="/"
                 onClick={() => setMobileMenuOpen(false)}

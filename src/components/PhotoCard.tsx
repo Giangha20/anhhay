@@ -14,7 +14,7 @@ export function PhotoCard({ image, onClick, cardSize = 'medium' }: PhotoCardProp
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
-  const thumbUrl = `/api/images/${image.filename}?thumb=1`;
+  const thumbUrl = image.thumbDataUrl || `/api/images/${image.filename}?thumb=1`;
 
   const sizeClasses = {
     small: 'h-48 sm:h-56',

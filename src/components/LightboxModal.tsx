@@ -23,6 +23,8 @@ export interface LightboxImage {
   width?: number | null;
   height?: number | null;
   size?: number;
+  thumbDataUrl?: string | null;
+  dataUrl?: string | null;
   createdAt?: string | Date;
   category?: {
     id: string;
@@ -104,7 +106,7 @@ export function LightboxModal({
     setTouchStartX(null);
   };
 
-  const imageUrl = `/api/images/${currentImage.filename}`;
+  const imageUrl = currentImage.dataUrl || `/api/images/${currentImage.filename}`;
 
   return (
     <div
