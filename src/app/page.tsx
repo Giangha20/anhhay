@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { PhotoCard } from '@/components/PhotoCard';
@@ -13,6 +14,7 @@ import {
   ChevronDown,
   RefreshCw,
   Search,
+  Upload,
 } from 'lucide-react';
 
 interface CategoryItem {
@@ -175,6 +177,15 @@ export default function HomePage() {
               <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-600 dark:text-slate-400 font-normal leading-relaxed">
                 {settings.introText}
               </p>
+              <div className="pt-2 flex items-center justify-center gap-3">
+                <Link
+                  href="/admin/photos"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 transition-all hover:scale-105"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>Tải ảnh lên ngay</span>
+                </Link>
+              </div>
             </div>
           </section>
         )}

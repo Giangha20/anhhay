@@ -28,6 +28,11 @@ export const ALLOWED_MIME_TYPES = [
   'image/png',
   'image/webp',
   'image/gif',
+  'image/avif',
+  'image/tiff',
+  'image/svg+xml',
+  'image/heic',
+  'image/heif',
 ];
 
 export const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024; // 100MB per file (Không giới hạn ảnh lớn)
@@ -139,17 +144,22 @@ export async function validateImageBuffer(buffer: Buffer): Promise<{
       png: 'image/png',
       webp: 'image/webp',
       gif: 'image/gif',
+      avif: 'image/avif',
+      tiff: 'image/tiff',
+      svg: 'image/svg+xml',
+      heif: 'image/heif',
+      heic: 'image/heic',
     };
 
-    const mime = mimeMap[metadata.format];
-    if (!mime || !ALLOWED_MIME_TYPES.includes(mime)) {
+    const mime = mimeMap[metadata.format] || `image/${metadata.format}`;
+    if (!ALLOWED_MIME_TYPES.includes(mime)) {
       return {
         valid: false,
         format: metadata.format,
         width: metadata.width || 0,
         height: metadata.height || 0,
         size: buffer.length,
-        error: `Định dạng ảnh '${metadata.format}' không được hỗ trợ. Chỉ hỗ trợ JPEG, PNG, WebP, GIF.`,
+        error: `Định dạng ảnh '${metadata.format}' không được hỗ trợ. Vui lòng chọn ảnh hợp lệ.`,
       };
     }
 

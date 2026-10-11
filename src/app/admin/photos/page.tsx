@@ -492,11 +492,11 @@ export default function AdminPhotosPage() {
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  accept="image/*"
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                <ImageIcon className="w-10 h-10 mx-auto text-slate-400 mb-2" />
+                <ImageIcon className="w-10 h-10 mx-auto text-emerald-500 mb-2" />
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
                   Kéo thả ảnh vào đây hoặc nhấp để chọn tệp
                 </p>
@@ -504,8 +504,15 @@ export default function AdminPhotosPage() {
                   ✨ Hỗ trợ tải lên KHÔNG GIỚI HẠN số lượng ảnh (chọn hàng trăm ảnh cùng lúc)
                 </p>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  Hỗ trợ JPEG, PNG, WebP, GIF (tối đa 100MB/ảnh)
+                  Hỗ trợ mọi định dạng ảnh (JPEG, PNG, WebP, GIF, HEIC từ iPhone, tối đa 100MB/ảnh)
                 </p>
+
+                <div className="mt-3">
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-md shadow-emerald-500/20">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Chọn ảnh từ thiết bị</span>
+                  </span>
+                </div>
 
                 {selectedFiles.length > 0 && (
                   <div className="mt-3 p-3 bg-emerald-50 dark:bg-emerald-950/50 rounded-xl text-xs font-semibold text-emerald-700 dark:text-emerald-300 flex items-center justify-between">
@@ -610,28 +617,35 @@ export default function AdminPhotosPage() {
                 >
                   Hủy
                 </button>
-                <button
-                  type="submit"
-                  disabled={isUploading || selectedFiles.length === 0}
-                  className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2"
-                >
-                  {isUploading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>
-                        {uploadProgress
-                          ? `Đang tải ${uploadProgress.current}/${uploadProgress.total} (${uploadProgress.percent}%)`
-                          : 'Đang lưu ảnh...'}
-                      </span>
-                    </>
-                  ) : (
-                    <span>
-                      {selectedFiles.length > 0
-                        ? `Tải lên ${selectedFiles.length} ảnh`
-                        : 'Bắt đầu tải lên'}
-                    </span>
-                  )}
-                </button>
+                {selectedFiles.length === 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 flex items-center gap-2 cursor-pointer transition-all hover:scale-105"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Chọn ảnh để tải lên</span>
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={isUploading}
+                    className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>
+                          {uploadProgress
+                            ? `Đang tải ${uploadProgress.current}/${uploadProgress.total} (${uploadProgress.percent}%)`
+                            : 'Đang lưu ảnh...'}
+                        </span>
+                      </>
+                    ) : (
+                      <span>Tải lên {selectedFiles.length} ảnh</span>
+                    )}
+                  </button>
+                )}
               </div>
             </form>
           </div>
