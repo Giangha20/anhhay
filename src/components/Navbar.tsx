@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Sun, Moon, Menu, X, Image as ImageIcon, Shield } from 'lucide-react';
+import { Search, Sun, Moon, Menu, X, Image as ImageIcon } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 
 interface NavbarProps {
@@ -84,14 +84,6 @@ export function Navbar({ siteName, logoUrl, onSearch, initialSearch = '' }: Navb
             >
               Danh mục
             </Link>
-            <Link
-              href="/admin"
-              className="px-3.5 py-2 text-sm font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-emerald-500 flex items-center gap-1.5 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
-              title="Trang quản trị"
-            >
-              <Shield className="w-4 h-4 text-emerald-500" />
-              <span>Quản trị</span>
-            </Link>
 
             {/* Dark / Light Toggle */}
             <button
@@ -157,14 +149,6 @@ export function Navbar({ siteName, logoUrl, onSearch, initialSearch = '' }: Navb
                 className="px-3 py-2.5 rounded-lg text-base font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900"
               >
                 Danh mục ảnh
-              </Link>
-              <Link
-                href="/admin"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2.5 rounded-lg text-base font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-900"
-              >
-                <Shield className="w-4 h-4" />
-                <span>Trang quản trị (Admin)</span>
               </Link>
             </div>
           </div>

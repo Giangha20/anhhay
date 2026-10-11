@@ -266,27 +266,20 @@ export default function HomePage() {
                 <ImageIcon className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                {searchQuery ? 'Không tìm thấy hình ảnh phù hợp' : 'Chưa có hình ảnh nào'}
+                {searchQuery ? 'Không tìm thấy hình ảnh phù hợp' : 'Bộ sưu tập đang được cập nhật'}
               </h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
                 {searchQuery
                   ? 'Vui lòng thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc danh mục.'
-                  : 'Hãy đăng nhập vào trang quản trị để tải lên những bức ảnh đầu tiên cho website.'}
+                  : 'Các tác phẩm mới đang được tuyển chọn và sẽ xuất hiện sớm nhất.'}
               </p>
-              {searchQuery ? (
+              {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
                   className="px-5 py-2.5 rounded-xl bg-emerald-500 text-white font-semibold text-sm hover:bg-emerald-600 transition-colors shadow-md shadow-emerald-500/20"
                 >
                   Xem toàn bộ ảnh
                 </button>
-              ) : (
-                <a
-                  href="/admin"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white font-semibold text-sm hover:bg-emerald-600 transition-colors shadow-md shadow-emerald-500/20"
-                >
-                  Đến trang quản trị tải ảnh
-                </a>
               )}
             </div>
           )}
