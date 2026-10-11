@@ -121,7 +121,7 @@ export async function validateImageBuffer(buffer: Buffer): Promise<{
       width: 0,
       height: 0,
       size: buffer.length,
-      error: `Kích thước tệp vượt quá giới hạn cho phép (tối đa 50MB)`,
+      error: `Kích thước tệp vượt quá giới hạn cho phép (tối đa 100MB)`,
     };
   }
 
