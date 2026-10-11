@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id                 String         @id @default(cuid())
+  username           String         @unique
+  passwordHash       String
+  mustChangePassword Boolean        @default(true)
+  isActive           Boolean        @default(true)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  sessions           AdminSession[]
+  auditLogs          AuditLog[]
+}
+
+model Image {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  filename      String    @unique
+  relativePath  String
+  thumbnailPath String?
+  format        String
+  size          Int
+  width         Int?
+  height        Int?
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([categoryId])
+  @@index([createdAt])
+}
+
+model Category {
+  id           String     @id @default(cuid())
+  name         String
+  slug         String     @unique
+  description  String?
+  coverImage   String?
+  displayOrder Int        @default(0)
+  isVisible    Boolean    @default(true)
+  parentId     String?
+  parent       Category?  @relation("SubCategories", fields: [parentId], references: [id], onDelete: SetNull)
+  children     Category[] @relation("SubCategories")
+  images       Image[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([parentId])
+  @@index([displayOrder])
+}
+
+model SiteSettings {
+  id                    String   @id @default("default")
+  siteName              String   @default("PhotoWeb Gallery")
+  logoUrl               String?
+  seoTitle              String   @default("PhotoWeb - Thư viện ảnh chuyên nghiệp")
+  seoDescription        String   @default("Bộ sưu tập ảnh chất lượng cao")
+  introText             String   @default("Chào mừng đến với thư viện ảnh PhotoWeb.")
+  footerText            String   @default("© 2026 PhotoWeb. Bảo lưu mọi quyền.")
+  contactInfo           String?
+  primaryColor          String   @default("#10b981")
+  bgColor               String   @default("#0f172a")
+  galleryLayout         String   @default("grid")
+  cardSize              String   @default("medium")
+  defaultTheme          String   @default("dark")
+  photosPerPage         Int      @default(12)
+  enableAnimations      Boolean  @default(true)
+  showHeroSection       Boolean  @default(true)
+  showCategoriesSection Boolean  @default(true)
+  updatedAt             DateTime @updatedAt
+}
+
+model ContentBlock {
+  id         String   @id @default(cuid())
+  type       String
+  title      String
+  subtitle   String?
+  content    String?
+  imageUrl   String?
+  buttonText String?
+  buttonLink String?
+  order      Int      @default(0)
+  isVisible  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([order])
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([token])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  adminId   String?
+  admin     Admin?   @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  action    String
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model LoginAttempt {
+  id          String    @id @default(cuid())
+  ipAddress   String    @unique
+  attempts    Int       @default(1)
+  lockedUntil DateTime?
+  lastAttempt DateTime  @default(now())
+}
