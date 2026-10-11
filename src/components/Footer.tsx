@@ -1,4 +1,6 @@
 import React from 'react';
+import Link from 'next/link';
+import { Shield, HardDrive, Heart } from 'lucide-react';
 
 interface FooterProps {
   footerText?: string;
@@ -14,15 +16,26 @@ export function Footer({ footerText, contactInfo }: FooterProps) {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-left space-y-1">
             <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-              {footerText || `© ${currentYear} PhotoWeb Gallery. Bộ sưu tập ảnh nghệ thuật trực tuyến.`}
+              {footerText || `© ${currentYear} PhotoWeb Gallery. Vận hành trên máy chủ Windows.`}
             </p>
             {contactInfo && (
               <p className="text-xs text-slate-500 dark:text-slate-500">{contactInfo}</p>
             )}
           </div>
 
-          <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
-            <span>Chào mừng bạn đến với không gian thưởng thức ảnh nghệ thuật</span>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <HardDrive className="w-3.5 h-3.5 text-emerald-500" />
+              <span>D:\PhotoWeb Storage</span>
+            </span>
+
+            <Link
+              href="/admin"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:text-emerald-500 transition-colors"
+            >
+              <Shield className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Quản trị hệ thống</span>
+            </Link>
           </div>
         </div>
       </div>

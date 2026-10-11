@@ -81,8 +81,34 @@ function createScenicSvg(title, subtitle, colorTop, colorBottom, accentColor, ic
   </svg>`;
 }
 
+const bcrypt = require('bcryptjs');
+
 async function main() {
   console.log('--- KHỞI TẠO DỮ LIỆU BAN ĐẦU (SEED DATABASE) ---');
+
+  // 0. Khởi tạo tài khoản quản trị Admin
+  const adminUsername = process.env.INITIAL_ADMIN_USERNAME || 'giangtptq';
+  const adminPassword = process.env.INITIAL_ADMIN_PASSWORD || 'Giangha@2k5';
+
+  console.log(`Kiểm tra tài khoản quản trị: ${adminUsername}`);
+  const existingAdmin = await prisma.admin.findUnique({
+    where: { username: adminUsername },
+  });
+
+  if (!existingAdmin) {
+    const passwordHash = await bcrypt.hash(adminPassword, 12);
+    const admin = await prisma.admin.create({
+      data: {
+        username: adminUsername,
+        passwordHash,
+        mustChangePassword: true,
+        isActive: true,
+      },
+    });
+    console.log(`✓ Đã tạo tài khoản quản trị ban đầu thành công: ${adminUsername}`);
+  } else {
+    console.log(`✓ Tài khoản admin ${adminUsername} đã sẵn sàng.`);
+  }
 
   // 1. Cài đặt website mặc định
   const existingSettings = await prisma.siteSettings.findUnique({

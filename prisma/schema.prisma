@@ -7,6 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Admin {
+  id                 String         @id @default(cuid())
+  username           String         @unique
+  passwordHash       String
+  mustChangePassword Boolean        @default(true)
+  isActive           Boolean        @default(true)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  sessions           AdminSession[]
+  auditLogs          AuditLog[]
+}
+
 model Image {
   id            String    @id @default(cuid())
   title         String
@@ -82,4 +94,38 @@ model ContentBlock {
   updatedAt  DateTime @updatedAt
 
   @@index([order])
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([token])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  adminId   String?
+  admin     Admin?   @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  action    String
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model LoginAttempt {
+  id          String    @id @default(cuid())
+  ipAddress   String    @unique
+  attempts    Int       @default(1)
+  lockedUntil DateTime?
+  lastAttempt DateTime  @default(now())
 }

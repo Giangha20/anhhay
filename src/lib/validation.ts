@@ -1,5 +1,27 @@
 import { z } from 'zod';
 
+export const loginSchema = z.object({
+  username: z.string().min(3, 'Tên đăng nhập phải có ít nhất 3 ký tự').max(50),
+  password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Vui lòng nhập mật khẩu hiện tại'),
+  newPassword: z.string().min(6, 'Mật khẩu mới phải có ít nhất 6 ký tự'),
+  confirmPassword: z.string().min(6, 'Xác nhận mật khẩu phải có ít nhất 6 ký tự'),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: 'Mật khẩu mới và xác nhận mật khẩu không khớp',
+  path: ['confirmPassword'],
+});
+
+export const changeUsernameSchema = z.object({
+  currentPassword: z.string().min(1, 'Vui lòng nhập mật khẩu hiện tại để xác thực'),
+  newUsername: z
+    .string()
+    .min(3, 'Tên đăng nhập mới phải có ít nhất 3 ký tự')
+    .max(50)
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Tên đăng nhập chỉ được chứa chữ cái, số, dấu gạch ngang hoặc gạch dưới'),
+});
 
 export const updateImageSchema = z.object({
   title: z.string().min(1, 'Tiêu đề ảnh không được để trống').max(200),
